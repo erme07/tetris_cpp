@@ -1,8 +1,7 @@
 # Variables
 CXX = g++
 CXXFLAGS = -Wall -g
-#LDFLAGS = -lgdi32 -mwindows
-LDFLAGS = -lgdi32
+LDFLAGS = -lgdi32 -mwindows
 
 
 # Objetivo principal

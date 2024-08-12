@@ -8,8 +8,6 @@
 #include <chrono>
 #include <random>
 
-void imprimirMarco();
-void gameover(std::vector<std::vector<int>> tablero);
 
 using namespace miniwin;
 using namespace std;
@@ -38,8 +36,6 @@ class Tablero{
               matriz[i][j] = 0;
       }
   }
-  
-    
   Tablero(int filas, int columnas) : ROWS(filas), COLS(columnas), matriz(filas, std::vector<int>(columnas)) {
       inicializarTablero();
       if(columnas==4){
@@ -50,46 +46,52 @@ class Tablero{
         posY = 0;
       }
   }
-    
-    void imprimirTablero(){
-      for(int y=0; y<ROWS; y++){
-        for(int x=0; x<COLS; x++){
-          if(matriz[y][x]==0)
-            color_rgb(131,141,114);
-          else
-            color(NEGRO);
-          rectangulo((x*cellsize)+MARGIN+posX+GAP,(y*cellsize)+MARGIN+posY+GAP,(x*cellsize)+cellsize+MARGIN+posX-1,(y*cellsize)+ cellsize + MARGIN+posY-1);
-          rectangulo_lleno((x*cellsize)+MARGIN+4+posX+GAP,(y*cellsize)+MARGIN+4+posY+GAP,(x*cellsize)+cellsize+MARGIN-3+posX-1,(y*cellsize)+cellsize+MARGIN-3+posY-1);
+  void imprimirTablero(){
+    for(int y=0; y<ROWS; y++){
+      for(int x=0; x<COLS; x++){
+        if(matriz[y][x]==0)
+          color_rgb(131,141,114);
+        else
+          color(NEGRO);
+        rectangulo((x*cellsize)+MARGIN+posX+GAP,(y*cellsize)+MARGIN+posY+GAP,(x*cellsize)+cellsize+MARGIN+posX-1,(y*cellsize)+ cellsize + MARGIN+posY-1);
+        rectangulo_lleno((x*cellsize)+MARGIN+4+posX+GAP,(y*cellsize)+MARGIN+4+posY+GAP,(x*cellsize)+cellsize+MARGIN-4+posX,(y*cellsize)+cellsize+MARGIN-4+posY);
+      }
+    }
+  }
+  void mostrarTablero(){
+    for(int y=0; y<ROWS; y++){
+      for(int x=0; x<COLS; x++){
+        std::cout << matriz[y][x] << " ";
+      }
+      std::cout << endl;
+    }
+  }
+  bool verificarLineas(int& nivel, int& puntaje){
+    int lineas = 0;
+    for(int i=0; i<ROWS; i++){
+      int contador = 0;
+      for(int j=0; j<COLS; j++){
+        if(matriz[i][j]==1)
+          contador++;
+      }
+      if(contador==COLS){
+        lineas++;
+        for(int j=0; j<COLS; j++)
+          matriz[i][j]=0;
+        for(int k=i; k>0; k--){
+          for(int j=0; j<COLS; j++)
+            matriz[k][j]=matriz[k-1][j];
         }
       }
     }
-
-    bool verificarLineas(int& nivel, int& puntaje){
-      int lineas = 0;
-      for(int i=0; i<ROWS; i++){
-        int contador = 0;
-        for(int j=0; j<COLS; j++){
-          if(matriz[i][j]==1)
-            contador++;
-        }
-        if(contador==COLS){
-          lineas++;
-          for(int j=0; j<COLS; j++)
-            matriz[i][j]=0;
-          for(int k=i; k>0; k--){
-            for(int j=0; j<COLS; j++)
-              matriz[k][j]=matriz[k-1][j];
-          }
-        }
-      }
-      if(lineas == 1 || lineas == 2)
-        puntaje += 100 * lineas * nivel;
-      else if(lineas == 3)
-        puntaje += 400 * nivel;
-      else if(lineas == 4)
-        puntaje += 800 * nivel;
-      
-      return (lineas == 0) ? false : true;
+    if(lineas == 1 || lineas == 2)
+      puntaje += 100 * lineas * nivel;
+    else if(lineas == 3)
+      puntaje += 400 * nivel;
+    else if(lineas == 4)
+      puntaje += 800 * nivel;
+    
+    return (lineas == 0) ? false : true;
   }
 };
 
@@ -110,8 +112,8 @@ struct posicion_t{
 
 struct tetraminos{
   int bolsaTetraminos[7] = {O_MINO,I_MINO,T_MINO,S_MINO,Z_MINO,L_MINO,J_MINO};
-  int figuraActual = 0;
-  int figuraSiguiente = 1;
+  int figuraActual;
+  int figuraSiguiente;
   std::random_device rd;
   std::mt19937 gen;
   
@@ -152,12 +154,19 @@ struct tetraminos{
   };
 
   tetraminos(): gen(std::chrono::system_clock::now().time_since_epoch().count()){
+    inicializarTetramino();
+  }
+  void inicializarTetramino(){
+    figuraActual = 0;
+    figuraSiguiente = 1;
     barajarBolsa();
   }
   void barajarBolsa() {
     std::shuffle(std::begin(bolsaTetraminos), std::end(bolsaTetraminos), gen);
   }
 };
+
+
 
 struct pieza_t{
   
@@ -180,37 +189,33 @@ struct pieza_t{
     };
     forma = *formas[bolsaTetraminos[posicionBolsa]];
   }
-
-  void mostrarForma(std::vector<std::vector<int>> forma){
-    for(size_t i=0; i<forma.size(); i++){
-      for(size_t j=0; j<forma[i].size(); j++){
-        cout<<forma[i][j]<<" ";
-      }
-      cout<<endl;
-    }
-  }
-  
   void imprimirPieza(){
+    color(NEGRO);
     for(size_t y=0; y<forma.size(); y++){
       for(size_t x=0; x<forma[y].size(); x++){
         if(forma[y][x]==1 && posicion.y+(int)y>=0){
-          color(NEGRO);
           rectangulo((x*cellsize)+MARGIN+(posicion.x*cellsize)+GAP,(y*cellsize)+MARGIN+(posicion.y*cellsize)+GAP,(x*cellsize)+cellsize+MARGIN-1+(posicion.x*cellsize),(y*cellsize)+ cellsize + MARGIN-1+(posicion.y*cellsize));
-          rectangulo_lleno((x*cellsize)+MARGIN+4+(posicion.x*cellsize)+GAP,(y*cellsize)+MARGIN+4+(posicion.y*cellsize)+GAP,(x*cellsize)+cellsize+MARGIN-3-1+(posicion.x*cellsize),(y*cellsize)+cellsize+MARGIN-3-1+(posicion.y*cellsize));
+          rectangulo_lleno((x*cellsize)+MARGIN+4+(posicion.x*cellsize)+GAP,(y*cellsize)+MARGIN+4+(posicion.y*cellsize)+GAP,(x*cellsize)+cellsize+MARGIN-4+(posicion.x*cellsize),(y*cellsize)+cellsize+MARGIN-4+(posicion.y*cellsize));
         }
       }
     }
   }
-
+  void mostrarPieza(){
+    for(size_t y=0; y<forma.size(); y++){
+      for(size_t x=0; x<forma[y].size(); x++){
+        std::cout << forma[y][x] << " ";
+      }
+      std::cout << std::endl;
+    }
+  }
   bool verificarColision(Tablero tablero,int tecla=ARRIBA){
     posicion_t direccion = {0, 0};
-    if(tecla==DERECHA){
+    if(tecla==DERECHA)
       direccion = {1,0};
-    }else if(tecla==IZQUIERDA){
+    else if(tecla==IZQUIERDA)
       direccion = {-1, 0};
-    }else if(tecla==ABAJO){
+    else if(tecla==ABAJO)
       direccion = {0, 1};
-    }
     for(size_t y=0; y<forma.size(); y++){
       for(size_t x=0; x<forma[y].size(); x++){
         if (forma[y][x] == 1) {
@@ -225,10 +230,8 @@ struct pieza_t{
         }
       }
     }
-    //std::cout<<"Colision no detectada"<<std::endl;
     return false;
   }
-
   bool verificarGameOver(Tablero tablero){
     for(size_t y=0; y<forma.size(); y++){
       for(size_t x=0; x<forma[y].size(); x++){
@@ -240,10 +243,8 @@ struct pieza_t{
         }
       }
     }
-    //std::cout<<"Colision no detectada"<<std::endl;
     return false;
   }
-
   void fijarPieza(Tablero& tablero){
     for(size_t y=0; y<forma.size(); y++){
       for(size_t x=0; x<forma[y].size(); x++){
@@ -257,11 +258,11 @@ struct pieza_t{
     }
     
   }
-
   void cambiarPieza(){
     posicion.y = -2;
     posicion.x = 4;
-    if(tetramino.figuraActual==6){
+    asignarForma(tetramino.bolsaTetraminos,tetramino.figuraSiguiente);
+    if(tetramino.figuraSiguiente==6){
       tetramino.barajarBolsa();
       tetramino.figuraActual=0;
       tetramino.figuraSiguiente=1;
@@ -269,35 +270,24 @@ struct pieza_t{
       tetramino.figuraActual++;
       tetramino.figuraSiguiente++;
     }
-    std::cout << tetramino.figuraActual << std::endl;
-    std::cout << tetramino.figuraSiguiente << std::endl;
-    std::cout << "fffff" << std::endl;
-    asignarForma(tetramino.bolsaTetraminos,tetramino.figuraActual);
   }
-  
-
   void rotarPieza(Tablero& tableroPrincipal) {
     if(posicion.x<0)
       posicion.x = 0;
     if(posicion.x + forma.size() > 9)
       posicion.x = 10 - forma.size();
-
-      // Guardar la forma original
     std::vector<std::vector<int>> formaOriginal = forma;
-
-    // Realizar la rotación  
     std::vector<std::vector<int>> nuevaForma(forma[0].size(), std::vector<int>(forma.size()));
     for (size_t i = 0; i < forma.size(); i++) {
         for (size_t j = 0; j < forma[i].size(); j++) 
             nuevaForma[j][forma.size() - 1 - i] = forma[i][j];
     }
     forma = nuevaForma;
-    if (verificarColision(tableroPrincipal)) {
+    if (verificarColision(tableroPrincipal))
         forma = formaOriginal;
-    }
   }
-
 };
+
 
 class Datos{
   public:
@@ -305,9 +295,12 @@ class Datos{
   int score;
   int velocidad;
   Datos(){
+    inicializarDatos();
+  }
+  void inicializarDatos(){
     nivel = 1;
     score = 0;
-    velocidad = 100 * nivel;
+    velocidad = 80 * nivel;
     color(NEGRO);
     texto(230, 10, "SCORE");
     texto(230, 30, std::to_string(score));
@@ -315,24 +308,21 @@ class Datos{
     texto(230, 80, std::to_string(nivel));
   }
   void actualizarScore(){
-    int nuevonivel;
+    int nuevonivel = 1;
     color_rgb(137,151,117);
     rectangulo_lleno(230, 30,320, 50);
     color(NEGRO);
     texto(230, 30, std::to_string(score));
-    if(score<2000)
-      nuevonivel = 1;
-    else if(score<4000)
-      nuevonivel = 2;
-    else if(score<6000)
-      nuevonivel = 3;
-    else if(score<8000)
-      nuevonivel = 4;
-    else if(score<10000)
+    if(score>=12000)
       nuevonivel = 5;
+    else if(score>=9000)
+      nuevonivel = 4;
+    else if(score>=6000)
+      nuevonivel = 3;
+    else if(score>=3000)
+      nuevonivel = 2;
     actualizarNivel(nuevonivel);
   }
-
   void actualizarNivel(int nuevonivel){
     if(nuevonivel!=nivel){
       nivel = nuevonivel;
@@ -340,10 +330,14 @@ class Datos{
       rectangulo_lleno(230, 80,320, 100);
       color(NEGRO);
       texto(230, 80, std::to_string(nivel));
-      velocidad = 100 * nivel;
+      velocidad = 80 * nivel;
     }
   }
 };
+
+void imprimirMarco();
+void gameover(std::vector<std::vector<int>>);
+void reset(Datos&,tetraminos&,Tablero&,Tablero&,pieza_t&,pieza_t&);
 
 int main(){
 
@@ -352,13 +346,13 @@ int main(){
 
   vredimensiona(320, 420);
   color_rgb(137,151,117);
-  rectangulo_lleno(0, 0, 380, 420);
+  rectangulo_lleno(0, 0, 320, 420);
   imprimirMarco();
 
   Datos estadisticas;
 
   Tablero tableroPrincipal(20,10);
-  Tablero tableroSiguiente(4,4);
+  Tablero tableroSiguiente(2,4);
 
   tetraminos tetramino;
 
@@ -387,14 +381,18 @@ int main(){
         pieza.posicion.y+=1;
         tableroPrincipal.imprimirTablero();
         pieza.imprimirPieza();
-        refresca();
       }
       else{
         pieza.fijarPieza(tableroPrincipal);
         if(pieza.verificarGameOver(tableroPrincipal)){
-          gameOver = true;
           gameover(tableroPrincipal.matriz);
-          continue;
+          if(pregunta("Volver a jugar?")){
+            reset(estadisticas, tetramino, tableroPrincipal, tableroSiguiente, pieza, piezaSiguiente);
+            continue;
+          }else{
+            gameOver = true;
+            continue;
+          }
         }
         pieza.cambiarPieza();
         if(tableroPrincipal.verificarLineas(estadisticas.nivel,estadisticas.score))
@@ -403,8 +401,6 @@ int main(){
         piezaSiguiente.asignarForma(tetramino.bolsaTetraminos,tetramino.figuraSiguiente);
         piezaSiguiente.fijarPieza(tableroSiguiente);
         tableroSiguiente.imprimirTablero();
-        
-        refresca();
       }
       
     }
@@ -412,14 +408,12 @@ int main(){
       pieza.rotarPieza(tableroPrincipal);
       tableroPrincipal.imprimirTablero();
       pieza.imprimirPieza();
-      refresca();
     }
     else if (t == DERECHA) {
       if(!pieza.verificarColision(tableroPrincipal,t)){
         pieza.posicion.x+=1;
         tableroPrincipal.imprimirTablero();
         pieza.imprimirPieza();
-        refresca();
       }
     }
     else if (t == IZQUIERDA) {
@@ -427,25 +421,27 @@ int main(){
         pieza.posicion.x-=1;
         tableroPrincipal.imprimirTablero();
         pieza.imprimirPieza();
-        refresca();
       }
     }
     
-    tiempo+=10;
-    if(tiempo>=510 - estadisticas.velocidad && t!=ABAJO){
+    if(tiempo>=500 - estadisticas.velocidad && t!=ABAJO){
       tiempo = 0;
       if(!pieza.verificarColision(tableroPrincipal,ABAJO)){
         pieza.posicion.y+=1;
         tableroPrincipal.imprimirTablero();
         pieza.imprimirPieza();
-        refresca();
       }
       else{
         pieza.fijarPieza(tableroPrincipal);
         if(pieza.verificarGameOver(tableroPrincipal)){
-          gameOver = true;
           gameover(tableroPrincipal.matriz);
-          continue;
+          if(pregunta("Volver a jugar?")){
+            reset(estadisticas, tetramino, tableroPrincipal, tableroSiguiente, pieza, piezaSiguiente);
+            continue;
+          }else{
+            gameOver = true;
+            continue;
+          }
         }
         pieza.cambiarPieza();
         if(tableroPrincipal.verificarLineas(estadisticas.nivel,estadisticas.score))
@@ -454,10 +450,10 @@ int main(){
         piezaSiguiente.asignarForma(tetramino.bolsaTetraminos,tetramino.figuraSiguiente);
         piezaSiguiente.fijarPieza(tableroSiguiente);
         tableroSiguiente.imprimirTablero();
-        
-        refresca();
       }
     }
+    tiempo+=10;
+    refresca();
     Sleep(10);
   }
   vcierra();
@@ -470,14 +466,29 @@ void imprimirMarco(){
 }
 
 void gameover(std::vector<std::vector<int>> tablero){
-    for(int y=(int)tablero.size()-1; y>=0; y--){
-      for(int x=(int)tablero[y].size()-1; x>=0; x--){
-          color(NEGRO);
-          rectangulo((x*cellsize)+MARGIN+GAP,(y*cellsize)+MARGIN+GAP,(x*cellsize)+cellsize+MARGIN-1,(y*cellsize)+ cellsize + MARGIN-1);
-          rectangulo_lleno((x*cellsize)+MARGIN+4+GAP,(y*cellsize)+MARGIN+4+GAP,(x*cellsize)+cellsize+MARGIN-3-1,(y*cellsize)+cellsize+MARGIN-3-1);
-          refresca();
-          Sleep(2);
-          
-      }
+  color(NEGRO);
+  for(int y=(int)tablero.size()-1; y>=0; y--){
+    for(int x=(int)tablero[y].size()-1; x>=0; x--){
+        rectangulo((x*cellsize)+MARGIN+GAP,(y*cellsize)+MARGIN+GAP,(x*cellsize)+cellsize+MARGIN-1,(y*cellsize)+ cellsize + MARGIN-1);
+        rectangulo_lleno((x*cellsize)+MARGIN+4+GAP,(y*cellsize)+MARGIN+4+GAP,(x*cellsize)+cellsize+MARGIN-4,(y*cellsize)+cellsize+MARGIN-4);
     }
+    refresca();
+    Sleep(30);
   }
+}
+
+void reset(Datos& stats, tetraminos& tetra, Tablero& tmain, Tablero& tnext, pieza_t& pieza, pieza_t& piezanext){
+  stats.inicializarDatos();
+  tetra.inicializarTetramino();
+  pieza.posicion = {4, -2};
+  pieza.asignarForma(tetra.bolsaTetraminos, tetra.figuraActual);
+  piezanext.asignarForma(tetra.bolsaTetraminos, tetra.figuraSiguiente);
+  tmain.inicializarTablero();
+  tnext.inicializarTablero();
+  tmain.imprimirTablero();
+  tnext.imprimirTablero();
+  piezanext.fijarPieza(tnext);
+  tnext.imprimirTablero();
+  refresca();
+  Sleep(10);
+}
