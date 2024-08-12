@@ -113,13 +113,20 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     int w, h;
     frame_real(iWidth, iHeight, w, h);
 
+   //codigo personalizado
+   int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+   int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+   int x = (screenWidth - w) / 2;
+   int y = (screenHeight - h) / 2;
+   // -------------------
     hWnd = CreateWindowEx (
       0,                   /* Extended possibilites for variation */
       szClassName,         /* Classname */
-      "MiniWin",           /* Title Text */
+      "Brick Game: TETRIS",           /* Title Text */
       WS_OVERLAPPEDWINDOW, /* default window */
-      CW_USEDEFAULT,       /* Windows decides the position */
-      CW_USEDEFAULT,       /* where the window ends up on the screen */
+      x,                   /* Calculated x position */
+      y, 
       w,                   /* The programs width */
       h,                   /* and height in pixels */
       HWND_DESKTOP,        /* The window is a child-window to desktop */
