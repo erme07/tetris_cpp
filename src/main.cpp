@@ -1,4 +1,4 @@
-#include "miniwin.h"
+
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <random>
-
+#include "../include/miniwin.h"
 
 using namespace miniwin;
 using namespace std;
@@ -58,7 +58,7 @@ class Tablero{
       }
     }
   }
-  void mostrarTablero(){
+  void mostrarTablero(){//muestra en consola (debug)
     for(int y=0; y<ROWS; y++){
       for(int x=0; x<COLS; x++){
         std::cout << matriz[y][x] << " ";
@@ -200,7 +200,8 @@ struct pieza_t{
       }
     }
   }
-  void mostrarPieza(){
+  void mostrarPieza(){//muestra en consola (debug)
+
     for(size_t y=0; y<forma.size(); y++){
       for(size_t x=0; x<forma[y].size(); x++){
         std::cout << forma[y][x] << " ";
@@ -372,7 +373,7 @@ int main(){
   tableroSiguiente.imprimirTablero();
 
   refresca();
-  
+
   while(!gameOver){
     int t = tecla();
     if (t == ABAJO) {
