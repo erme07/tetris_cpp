@@ -35,7 +35,7 @@ g++ -I./include -Wall -g -o tetris ./obj/main.o ./obj/miniwin.o -lgdi32 -mwindow
 ![preview](preview.jpg)
 
 
-## Creditos
+## Créditos
 
 - [Documentación de Miniwin](https://miniwin.readthedocs.io/en/latest/index.html)
 - [Repositorio de Miniwin](https://github.com/pauek/MiniWin)
