@@ -4,8 +4,8 @@ EXECUTABLE=tetris
 # Variables
 CXX = g++
 CXXFLAGS = -I$(INCLUDE_DIR) -Wall -g
-LDFLAGS = -lgdi32 -mwindows
 #LDFLAGS = -lgdi32
+LDFLAGS = -lgdi32 -mwindows #oculta la consola
 OBJ_DIR=./obj
 SRC_DIR=./src
 INCLUDE_DIR=./include
